@@ -1,0 +1,36 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Autoupdate
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-data:
+    name: Update data
+    runs-on: "ubuntu-latest"
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: stuttgart-weatherdata-crawler
+          environment-file: environment.yml
+          python-version: 3.10
+          auto-activate-base: false
+      - run: |
+          python crawler.py
+      - uses: actions/setup-node@v1
+      - uses: test-room-7/action-update-file@v1
+        with:
+            file-path: |
+                data/s-mitte-umweltschutz.json
+                data/s-mitte-schwabenzentrum.json
+                data/s-bad-cannstatt-branddirektion.json
+                data/s-sillenbuch-geschwister-scholl-gymnasium.json
+                data/s-muehlhausen-hauptklaerwerk.json
+                data/s-vaihingen-messfeld-uni.json
+            commit-msg: Update dataset
+            github-token: ${{ secrets.GITHUB_TOKEN }}
