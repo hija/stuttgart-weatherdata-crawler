@@ -59,9 +59,23 @@ def extract_data(html: str) -> dict[str, Union[str, datetime.datetime]]:
         ).b.string
 
         # Den Text zu einem Datetime parsen, damit wir es besser abspeichern können
-        last_update_as_datetime = datetime.datetime.strptime(
-            last_update_text, "(Stand: %d.%m.%Y, %H:%M Uhr)"
-        )
+
+        if "24:00 Uhr" in last_update_text:
+            # Sonderfall: Auf der Website wird einmal pro Tag 24:00 Uhr angegeben
+
+            # Wir ersetzen 24:00 mit 00:00
+            last_update_text = last_update_text.replace("24:00", "00:00")
+            # Danach parsen wir das Datum
+            last_update_as_datetime = datetime.datetime.strptime(
+                last_update_text, "(Stand: %d.%m.%Y, %H:%M Uhr)"
+            )
+            # Und addieren einen Tag, da 13.06.2022 24:00 Uhr == 14.06.2022 00:00 Uhr entspricht
+            last_update_as_datetime += datetime.timedelta(days=1)
+        else:
+            # "Normaler" Fall
+            last_update_as_datetime = datetime.datetime.strptime(
+                last_update_text, "(Stand: %d.%m.%Y, %H:%M Uhr)"
+            )
 
         observation["last_update"] = last_update_as_datetime.isoformat()
 
