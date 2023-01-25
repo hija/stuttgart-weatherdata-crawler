@@ -11,6 +11,7 @@ jobs:
   update-data:
     name: Update data
     runs-on: "ubuntu-latest"
+    timeout-minutes: 2
     defaults:
       run:
         shell: bash -l {0}
